@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>銀伴導航 SilverNav</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --bg-cream:#fffaf2;
+      --primary:#6482b0;
+      --accent:#e29b54;
+      --success:#22c55e;
+    }
+    body{
+      background:var(--bg-cream);
+      font-feature-settings: "localtw";
+    }
+    .card{ border-radius:0.75rem; }
+    .shadow-soft{ box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .btn{ min-height:64px; border-radius:18px; }
+    .btn-lg{ min-height:64px; border-radius:18px; font-size:22px; }
+    .btn-sm{ border-radius:12px; min-height:44px; }
+    .focus-ring:focus{
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(100,130,176,0.35);
+    }
+    .lang-active{ background-color:var(--primary); color:#fff; }
+    .primary{ background-color:var(--primary); color:#fff; }
+    .primary:hover{ background-color:#566f96; }
+    .accent{ background-color:var(--accent); color:#fff; }
+    .accent:hover{ background-color:#cf8b45; }
+    .ghost{ background-color:#fff; color:var(--primary); border:1px solid rgba(100,130,176,0.30); }
+    .ghost:hover{ background-color:rgba(100,130,176,0.06); }
+    .success{ background-color:var(--success); color:#fff; }
+
+    /* 長者友好樣式 */
+    .elder-friendly h3{ font-size:28px; }
+    .elder-friendly .label{ font-size:18px; }
+    .elder-friendly .keypoint{ font-size:18px; }
+    .elder-enlarge{ font-size:1.18em; }
+
+    .ph-grad{
+      background: radial-gradient(120% 120% at 0% 0%, rgba(100,130,176,0.18), rgba(226,155,84,0.12) 42%, rgba(255,255,255,0.6) 100%);
+      border:1px dashed rgba(100,130,176,0.35);
+    }
+    .transition-base{ transition: all .2s ease; }
+    .mobile-menu{ max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+    .mobile-menu.open{ max-height:600px; }
+
+    /* 路由頁面切換 */
+    .page-view{ display:none; }
+    .page-view.active{ display:block; }
+
+    /* 表格樣式 */
+    table{ border-collapse: collapse; width:100%; }
+    th,td{ border:1px solid #ddd; padding:10px; }
+    th{ background-color:var(--primary); color:white; }
+    a.gov-link{ color:#c2410c; text-decoration:underline; }
+
+    /* 彈窗提示 */
+    .toast{
+      position: fixed;
+      bottom:30px;
+      left:50%;
+      transform:translateX(-50%);
+      padding:16px 32px;
+      border-radius:12px;
+      color:white;
+      z-index:9999;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 0.3s;
+    }
+    .shturl.cc/{ opacity:1; pointer-events:auto; }
+
+    /* 表單統一間距 */
+    .form-item{ margin-bottom:1.25rem; }
+    label.form-label{ display:block; margin-bottom:0.5rem; font-weight:500; }
+    input,select,textarea{
+      width:100%;
+      padding:12px 16px;
+      border:1px solid rgba(100,130,176,0.3);
+      border-radius:12px;
+      font-size:16px;
+    }
+    textarea{ min-height:100px; resize:vertical; }
+  </style>
+</head>
+<body class="text-slate-800 antialiased">
+  <!-- 頂部導航 Hash路由 -->
+  <header class="w-full sticky top-0 z-40 backdrop-blur-md bg-[rgba(255,250,242,0.8)] border-b border-[rgba(100,130,176,0.18)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <a href="#/" class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl ph-grad" role="img" aria-label="銀伴導航Logo"></div>
+          <div class="leading-tight">
+            <div class="text-xl font-bold text-[color:var(--primary)]" data-lang-tc="銀伴導航 SilverNav" data-lang-sc="银伴导航 SilverNav" data-lang-en="SilverNav"></div>
+            <div class="text-xs text-slate-500" data-lang-tc="示範原型" data-lang-sc="示范原型" data-lang-en="Prototype"></div>
+          </div>
+        </a>
+        <!-- 桌面導航 -->
+        <nav class="hidden md:flex items-center gap-6 text-[15px]">
+          <a href="#/" class="transition-base hover:text-[color:var(--primary)]" data-lang-tc="首頁" data-lang-sc="首页" data-lang-en="Home"></a>
+          <a href="#/ngo" class="transition-base hover:text-[color:var(--primary)]" data-lang-tc="社福機構專區" data-lang-sc="社福机构专区" data-lang-en="NGO Zone"></a>
+          <a href="#/student" class="transition-base hover:text-[color:var(--primary)]" data-lang-tc="大專學生專區" data-lang-sc="大专学生专区" data-lang-en="Student Zone"></a>
+          <a href="#/elder" class="transition-base hover:text-[color:var(--primary)]" data-lang-tc="長者及家屬專區" data-lang-sc="长者及家属专区" data-lang-en="Elders & Family"></a>
+          <a href="#/welfare-table" class="transition-base hover:text-[color:var(--primary)]" data-lang-tc="地區福利資訊" data-lang-sc="地区福利资讯" data-lang-en="District Welfare"></a>
+          <a href="#/agency-list" class="transition-base hover:text-[color:var(--primary)]" data-lang-tc="社福機構列表" data-lang-sc="社福机构列表" data-lang-en="Agency List"></a>
+        </nav>
+        <div class="flex items-center gap-2">
+          <div class="hidden md:flex items-center gap-2">
+            <button class="px-3 py-2 rounded-lg ghost transition-base focus-ring lang-btn" data-set-lang="tc">繁體</button>
+            <button class="px-3 py-2 rounded-lg ghost transition-base focus-ring lang-btn" data-set-lang="sc">简体</button>
+            <button class="px-3 py-2 rounded-lg ghost transition-base focus-ring lang-btn" data-set-lang="en">EN</button>
+          </div>
+          <button id="menuToggle" class="md:hidden p-2 ghost rounded-lg focus-ring">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12h18M3 6h18M3 18h18"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <!-- 手機選單 -->
+      <div id="mobileMenu" class="mobile-menu md:hidden mt-3">
+        <div class="flex flex-col gap-3 pb-3">
+          <a href="#/" class="py-2 transition-base" data-lang-tc="首頁" data-lang-sc="首页" data-lang-en="Home"></a>
+          <a href="#/ngo" class="py-2 transition-base" data-lang-tc="社福機構專區" data-lang-sc="社福机构专区" data-lang-en="NGO Zone"></a>
+          <a href="#/student" class="py-2 transition-base" data-lang-tc="大專學生專區" data-lang-sc="大专学生专区" data-lang-en="Student Zone"></a>
+          <a href="#/elder" class="py-2 transition-base" data-lang-tc="長者及家屬專區" data-lang-sc="长者及家属专区" data-lang-en="Elders & Family"></a>
+          <a href="#/welfare-table" class="py-2 transition-base" data-lang-tc="地區福利資訊" data-lang-sc="地区福利资讯" data-lang-en="District Welfare"></a>
+          <a href="#/agency-list" class="py-2 transition-base" data-lang-tc="社福機構列表" data-lang-sc="社福机构列表" data-lang-en="Agency List"></a>
+          <div class="flex gap-2 pt-2">
+            <button class="px-3 py-2 rounded-lg ghost transition-base focus-ring lang-btn" data-set-lang="tc">繁體</button>
+            <button class="px-3 py-2 rounded-lg ghost transition-base focus-ring lang-btn" data-set-lang="sc">简体</button>
+            <button class="px-3 py-2 rounded-lg ghost transition-base focus-ring lang-btn" data-set-lang="en">EN</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
+    <!-- 1. 首頁 #/ -->
+    <div id="page-home" class="page-view active">
+      <section class="grid md:grid-cols-2 gap-10 items-center">
+        <div class="space-y-5">
+          <h1 class="text-4xl md:text-5xl font-extrabold text-[color:var(--primary)] tracking-tight" data-lang-tc="銀伴導航 SilverNav" data-lang-sc="银伴导航 SilverNav" data-lang-en="SilverNav"></h1>
+          <p class="text-xl text-slate-700" data-lang-tc="跨持份者服務平台｜連結社福機構、大專義工、長者及其家屬" data-lang-sc="跨持份者服务平台｜连结社福机构、大专义工、长者及其家属" data-lang-en="Cross‑stakeholder service platform | Connect NGOs, student volunteers, elders and families"></p>
+          <div class="flex flex-wrap gap-3 pt-2">
+            <a href="#/elder" class="btn primary transition-base focus-ring px-6 flex items-center justify-center">
+              <span class="mr-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 4l12 8-12 8V4z" stroke="#fff" stroke-width="2"/></svg>
+              </span>
+              <span data-lang-tc="前往長者服務" data-lang-sc="前往长者服务" data-lang-en="Elder Services"></span>
+            </a>
+            <a href="#/welfare-table" class="btn accent transition-base focus-ring px-6 flex items-center justify-center">
+              <span class="mr-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1‑4L16.5 3.5z" stroke="#fff" stroke-width="2"/></svg>
+              </span>
+              <span data-lang-tc="查詢政府福利" data-lang-sc="查询政府福利" data-lang-en="Check Welfare"></span>
+            </a>
+          </div>
+        </div>
+        <div class="h-56 md:h-80 card shadow-soft overflow-hidden">
+          <img src="https://images.pexels.com/photos/6111581/pexels-photo-6111581.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="義工陪伴長者示意圖" class="w-full h-full object-cover">
+        </div>
+      </section>
+      <section class="mt-20">
+        <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-8 text-center" data-lang-tc="各持份者入口" data-lang-sc="各持份者入口" data-lang-en="Stakeholder Entrance"></h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="card shadow-soft bg-white p-6 flex flex-col">
+            <h3 class="text-2xl font-bold text-[color:var(--primary)]" data-lang-tc="社福機構專區" data-lang-sc="社福机构专区" data-lang-en="NGO Zone"></h3>
+            <p class="mt-2 text-slate-600" data-lang-tc="義工管理、服務紀錄、報表匯出" data-lang-sc="义工管理、服务记录、报表汇出" data-lang-en="Volunteer management, service logs, report export"></p>
+            <div class="mt-6">
+              <a href="#/ngo" class="btn primary transition-base focus-ring w-full flex items-center justify-center" data-lang-tc="進入專區" data-lang-sc="进入专区" data-lang-en="Enter Zone"></a>
+            </div>
+          </div>
+          <div class="card shadow-soft bg-white p-6 flex flex-col">
+            <h3 class="text-2xl font-bold text-[color:var(--primary)]" data-lang-tc="大專學生專區" data-lang-sc="大专学生专区" data-lang-en="Student Zone"></h3>
+            <p class="mt-2 text-slate-600" data-lang-tc="義工崗位、服務時數、證明申請" data-lang-sc="义工岗位、服务时数、证明申请" data-lang-en="Volunteer posts, service hours, certificate"></p>
+            <div class="mt-6">
+              <a href="#/student" class="btn primary transition-base focus-ring w-full flex items-center justify-center" data-lang-tc="進入專區" data-lang-sc="进入专区" data-lang-en="Enter Zone"></a>
+            </div>
+          </div>
+          <div class="card shadow-soft bg-white p-6 flex flex-col">
+            <h3 class="text-2xl font-bold text-[color:var(--primary)]" data-lang-tc="長者及家屬專區" data-lang-sc="长者及家属专区" data-lang-en="Elders & Family"></h3>
+            <p class="mt-2 text-slate-600" data-lang-tc="地區資源查詢、福利資訊、陪伴預約" data-lang-sc="地区资源查询、福利资讯、陪伴预约" data-lang-en="District resource, welfare info, booking"></p>
+            <div class="mt-6">
+              <a href="#/elder" class="btn primary transition-base focus-ring w-full flex items-center justify-center" data-lang-tc="進入專區" data-lang-sc="进入专区" data-lang-en="Enter Zone"></a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 2. 社福機構主頁 #/ngo -->
+    <div id="page-ngo" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="社福機構專區" data-lang-sc="社福机构专区" data-lang-en="NGO Zone"></h2>
+      <p class="mb-8 text-slate-600" data-lang-tc="機構後台管理入口，點擊功能跳轉對應操作頁面；完整機構名單：<a href='#/agency-list'>社福機構列表</a>" data-lang-sc="机构后台管理入口，点击功能跳转对应操作页面；完整机构名单：<a href='#/agency-list'>社福机构列表</a>" data-lang-en="NGO management portal, click function to enter page. Full list: <a href='#/agency-list'>Agency List</a>"></p>
+      <div class="card shadow-soft bg-white p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a href="#/ngo-login" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="登入機構後台" data-lang-sc="登入机构后台" data-lang-en="NGO Console Login"></span><span>→</span>
+          </a>
+          <a href="#/ngo-apply" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="申請平台帳號" data-lang-sc="申请平台账号" data-lang-en="Apply NGO Account"></span><span>→</span>
+          </a>
+          <a href="#/ngo-match" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="義工配對管理" data-lang-sc="义工配对管理" data-lang-en="Volunteer Matching Admin"></span><span>→</span>
+          </a>
+          <a href="#/ngo-log" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="服務紀錄匯出" data-lang-sc="服务记录汇出" data-lang-en="Export Service Logs"></span><span>→</span>
+          </a>
+          <a href="#/ngo-report" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="社署標準報表產生" data-lang-sc="社署标准报表生成" data-lang-en="SWD Standard Report"></span><span>→</span>
+          </a>
+          <a href="#/ngo-material" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="訓練資源下載" data-lang-sc="训练资源下载" data-lang-en="Training Material Library"></span><span>→</span>
+          </a>
+        </div>
+        <div class="mt-10">
+          <a href="#/" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回首頁" data-lang-sc="返回首页" data-lang-en="Back Home"></span></a>
+        </div>
+      </div>
+    </div>
+    <!-- 社福機構二級子頁：登入頁 -->
+    <div id="page-ngo-login" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="機構後台登入演示頁" data-lang-sc="机构后台登录演示页" data-lang-en="NGO Console Login Demo"></h2>
+      <div class="card shadow-soft bg-white p-8 max-w-xl">
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="機構註冊編號" data-lang-sc="机构注册编号" data-lang-en="NGO Registration ID"></label>
+          <input type="text" placeholder="輸入機構註冊編號">
+        </div>
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="管理員密碼" data-lang-sc="管理员密码" data-lang-en="Admin Password"></label>
+          <input type="password" placeholder="輸入密碼">
+        </div>
+        <div class="form-item flex items-center gap-2">
+          <input type="checkbox" style="width:auto">
+          <span data-lang-tc="記住登入資訊" data-lang-sc="记住登录信息" data-lang-en="Remember login info"></span>
+        </div>
+        <button id="ngoLoginBtn" class="btn primary w-full transition-base focus-ring" data-lang-tc="模擬登入" data-lang-sc="模拟登录" data-lang-en="Simulate Login"></button>
+        <div class="mt-6">
+          <a href="#/ngo" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回機構專區" data-lang-sc="返回机构专区" data-lang-en="Back to NGO Zone"></span></a>
+        </div>
+      </div>
+    </div>
+    <!-- 社福機構二級子頁：義工配對管理 -->
+    <div id="page-ngo-match" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="義工配對管理面板" data-lang-sc="义工配对管理面板" data-lang-en="Volunteer Matching Dashboard"></h2>
+      <div class="card shadow-soft bg-white p-8">
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="待配對服務類型" data-lang-sc="待配对服务类型" data-lang-en="Service Type to Match"></label>
+          <select>
+            <option data-lang-tc="居家陪伴" data-lang-sc="居家陪伴" data-lang-en="Home Companion"></option>
+            <option data-lang-tc="覆診陪同" data-lang-sc="复诊陪同" data-lang-en="Clinic Escort"></option>
+            <option data-lang-tc="數碼支援" data-lang-sc="数码支援" data-lang-en="Digital Support"></option>
+          </select>
+        </div>
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="服務地區" data-lang-sc="服务地区" data-lang-en="Service District"></label>
+          <select>
+            <option value="shatin" data-lang-tc="沙田區" data-lang-sc="沙田区" data-lang-en="Sha Tin"></option>
+            <option value="kwuntong" data-lang-tc="觀塘區" data-lang-sc="观塘区" data-lang-en="Kwun Tong"></option>
+            <option value="yuenlong" data-lang-tc="元朗區" data-lang-sc="元朗区" data-lang-en="Yuen Long"></option>
+          </select>
+        </div>
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="備註篩選條件" data-lang-sc="备注筛选条件" data-lang-en="Filter Remark"></label>
+          <textarea placeholder="例如：需要懂廣東話、可協助輪椅長者"></textarea>
+        </div>
+        <button id="matchVolBtn" class="btn primary w-full transition-base focus-ring" data-lang-tc="自動配對義工" data-lang-sc="自动配对义工" data-lang-en="Auto Match Volunteer"></button>
+        <div class="mt-6">
+          <a href="#/ngo" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回機構專區" data-lang-sc="返回机构专区" data-lang-en="Back to NGO Zone"></span></a>
+        </div>
+      </div>
+    </div>
+    <!-- 社福機構二級子頁：報表匯出 -->
+    <div id="page-ngo-report" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="社署標準報表匯出" data-lang-sc="社署标准报表汇出" data-lang-en="SWD Report Export"></h2>
+      <div class="card shadow-soft bg-white p-8">
+        <div class="form-item grid grid-cols-2 gap-4">
+          <div>
+            <label class="form-label" data-lang-tc="起始月份" data-lang-sc="起始月份" data-lang-en="Start Month"></label>
+            <input type="month">
+          </div>
+          <div>
+            <label class="form-label" data-lang-tc="結束月份" data-lang-sc="结束月份" data-lang-en="End Month"></label>
+            <input type="month">
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="報表類型" data-lang-sc="报表类型" data-lang-en="Report Template"></label>
+          <select>
+            <option data-lang-tc="每月服務時數統計表（社署格式）" data-lang-sc="每月服务时数统计表（社署格式）" data-lang-en="Monthly Service Hour Stat (SWD)"></option>
+            <option data-lang-tc="長者服務個案紀錄表" data-lang-sc="长者服务个案记录表" data-lang-en="Elder Case Record"></option>
+            <option data-lang-tc="義工出勤匯總表" data-lang-sc="义工出勤汇总表" data-lang-en="Volunteer Attendance Summary"></option>
+          </select>
+        </div>
+        <button id="exportReportBtn" class="btn primary w-full transition-base focus-ring" data-lang-tc="匯出Excel報表" data-lang-sc="汇出Excel报表" data-lang-en="Export Excel Report"></button>
+        <div class="mt-6">
+          <a href="#/ngo" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回機構專區" data-lang-sc="返回机构专区" data-lang-en="Back to NGO Zone"></span></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 大專學生主頁 #/student -->
+    <div id="page-student" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="大專學生義工專區" data-lang-sc="大专学生义工专区" data-lang-en="Student Volunteer Zone"></h2>
+      <p class="mb-8 text-slate-600" data-lang-tc="學生義工全套操作入口，點擊功能跳轉填寫頁面" data-lang-sc="学生义工全套操作入口，点击功能跳转填写页面" data-lang-en="Full volunteer portal for university students, click to enter form page"></p>
+      <div class="card shadow-soft bg-white p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a href="#/stu-register" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="註冊銀伴義工帳號" data-lang-sc="注册银伴义工账号" data-lang-en="Register Volunteer Account"></span><span>→</span>
+          </a>
+          <a href="#/stu-job" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="查詢可報名服務崗位" data-lang-sc="查询可报名服务岗位" data-lang-en="Browse Service Vacancies"></span><span>→</span>
+          </a>
+          <a href="#/stu-hourlog" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="填寫服務時數紀錄" data-lang-sc="填写服务时数记录" data-lang-en="Log Volunteer Hours"></span><span>→</span>
+          </a>
+          <a href="#/stu-cert" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="申請義工服務證明" data-lang-sc="申请义工服务证明" data-lang-en="Apply Volunteer Certificate"></span><span>→</span>
+          </a>
+          <a href="#/stu-credit" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="服務學習學分對接" data-lang-sc="服务学习学分对接" data-lang-en="Service-Learning Credit Link"></span><span>→</span>
+          </a>
+          <a href="#/stu-train" class="btn ghost transition-base focus-ring px-4 flex items-center justify-between">
+            <span data-lang-tc="線上長者溝通訓練課程" data-lang-sc="线上长者沟通训练课程" data-lang-en="Elder Communication Online Training"></span><span>→</span>
+          </a>
+        </div>
+        <div class="mt-10">
+          <a href="#/" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回首頁" data-lang-sc="返回首页" data-lang-en="Back Home"></span></a>
+        </div>
+      </div>
+    </div>
+    <!-- 大專學生二級子頁：義工註冊 -->
+    <div id="page-stu-register" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="義工註冊表單" data-lang-sc="义工注册表单" data-lang-en="Volunteer Registration Form"></h2>
+      <div class="card shadow-soft bg-white p-8 max-w-xl">
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="學生姓名" data-lang-sc="学生姓名" data-lang-en="Full Name"></label>
+          <input type="text" placeholder="真實姓名">
+        </div>
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="就讀院校及學系" data-lang-sc="就读院校及学系" data-lang-en="University & Major"></label>
+          <input type="text" placeholder="例如：香港恒生大學 工商管理">
+        </div>
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="學生證編號" data-lang-sc="学生证编号" data-lang-en="Student ID"></label>
+          <input type="text">
+        </div>
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="可提供服務類型（可多選）" data-lang-sc="可提供服务类型（可多选）" data-lang-en="Available Service Types (Multiple)"></label>
+          <div class="flex flex-wrap gap-3">
+            <label class="flex items-center gap-2"><input type="checkbox" style="width:auto"><span data-lang-tc="覆診陪同" data-lang-sc="复诊陪同" data-lang-en="Clinic Escort"></span></label>
+            <label class="flex items-center gap-2"><input type="checkbox" style="width:auto"><span data-lang-tc="數碼支援教學" data-lang-sc="数码支援教学" data-lang-en="Digital Tutoring"></span></label>
+            <label class="flex items-center gap-2"><input type="checkbox" style="width:auto"><span data-lang-tc="居家陪伴聊天" data-lang-sc="居家陪伴聊天" data-lang-en="Home Chat Companion"></span></label>
+          </div>
+        </div>
+        <button id="stuRegBtn" class="btn primary w-full transition-base focus-ring" data-lang-tc="提交註冊申請" data-lang-sc="提交注册申请" data-lang-en="Submit Registration"></button>
+        <div class="mt-6">
+          <a href="#/student" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回學生專區" data-lang-sc="返回学生专区" data-lang-en="Back to Student Zone"></span></a>
+        </div>
+      </div>
+    </div>
+    <!-- 大專學生二級子頁：服務證明申請 -->
+    <div id="page-stu-cert" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="義工服務證明申請" data-lang-sc="义工服务证明申请" data-lang-en="Volunteer Certificate Application"></h2>
+      <div class="card shadow-soft bg-white p-8 max-w-xl">
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="需要證明用途" data-lang-sc="需要证明用途" data-lang-en="Certificate Purpose"></label>
+          <select>
+            <option data-lang-tc="大學服務學習學分" data-lang-sc="大学服务学习学分" data-lang-en="University Service-Learning Credit"></option>
+            <option data-lang-tc="求職履歷證明" data-lang-sc="求职履历证明" data-lang-en="Job Resume Reference"></option>
+            <option data-lang-tc="海外升學推薦輔助" data-lang-sc="海外升学推荐辅助" data-lang-en="Overseas Study Reference"></option>
+          </select>
+        </div>
+        <div class="form-item grid grid-cols-2 gap-4">
+          <div>
+            <label class="form-label" data-lang-tc="服務起始月份" data-lang-sc="服务起始月份" data-lang-en="Service Start"></label>
+            <input type="month">
+          </div>
+          <div>
+            <label class="form-label" data-lang-tc="服務完結月份" data-lang-sc="服务完结月份" data-lang-en="Service End"></label>
+            <input type="month">
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-label" data-lang-tc="收件電郵（發電子證明）" data-lang-sc="收件电邮（发电子证明）" data-lang-en="Receive Email for E-Certificate"></label>
+          <input type="email" placeholder="大學/個人電郵">
+        </div>
+        <button id="stuCertBtn" class="btn primary w-full transition-base focus-ring" data-lang-tc="提交證明申請" data-lang-sc="提交证明申请" data-lang-en="Submit Certificate Request"></button>
+        <div class="mt-6">
+          <a href="#/student" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回學生專區" data-lang-sc="返回学生专区" data-lang-en="Back to Student Zone"></span></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 長者及家屬主頁 #/elder -->
+    <div id="page-elder" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="長者及家屬服務面板" data-lang-sc="长者及家属服务面板" data-lang-en="Elder & Family Service Panel"></h2>
+      <p class="mb-8 text-slate-600" data-lang-tc="長者友好大按鈕，點擊跳轉填寫頁面；福利總表：<a href='#/welfare-table'>地區福利資訊查詢</a>" data-lang-sc="长者友好大按钮，点击跳转填写页面；福利总表：<a href='#/welfare-table'>地区福利资讯查询</a>" data-lang-en="Elder-friendly big buttons, click to enter form page. Full welfare table: <a href='#/welfare-table'>District Welfare Query</a>"></p>
+      <div id="elder" class="card shadow-soft bg-white p-8 flex flex-col elder-friendly relative">
+        <div class="flex items-start justify-between">
+          <h3 class="font-bold text-[28px] text-[color:var(--primary)]" data-lang-tc="服務操作入口" data-lang-sc="服务操作入口" data-lang-en="Service Entrance"></h3>
+          <button id="toggleLarge" class="btn-sm ghost transition-base focus-ring px-4 py-2" data-lang-tc="大字模式" data-lang-sc="大字模式" data-lang-en="Large Text"></button>
+        </div>
+        <p class="mt-2 text-slate-700 text-[18px]" data-lang-tc="簡單操作，方便長者與家人使用" data-lang-sc="简单操作，方便长者与家人使用" data-lang-en="Simple and friendly for elders and families"></p>
+        <div class="grid grid-cols-1 gap-3 mt-5">
+          <a href="#/welfare-table" class="btn btn-lg primary transition-base focus-ring px-5 flex items-center justify-between">
+            <span class="flex items-center gap-2"><span data-lang-tc="福利資訊查詢" data-lang-sc="福利资讯查询" data-lang-en="Benefits Info Query"></span></span><span class="text-white/80">→</span>
+          </a>
+          <a href="#/reminder" class="btn btn-lg primary transition-base focus-ring px-5 flex items-center justify-between">
+            <span class="flex items-center gap-2"><span data-lang-tc="服務提醒設定" data-lang-sc="服务提醒设定" data-lang-en="Service Reminder Setup"></span></span><span class="text-white/80">→</span>
+          </a>
+          <a href="#/proxy" class="btn btn-lg primary transition-base focus-ring px-5 flex items-center justify-between">
+            <span class="flex items-center gap-2"><span data-lang-tc="代辦登記申請" data-lang-sc="代办登记申请" data-lang-en="Proxy Application Registration"></span></span><span class="text-white/80">→</span>
+          </a>
+          <a href="#/booking" class="btn btn-lg primary transition-base focus-ring px-5 flex items-center justify-between">
+            <span class="flex items-center gap-2"><span data-lang-tc="義工預約陪伴服務" data-lang-sc="义工预约陪伴服务" data-lang-en="Book Volunteer Companion"></span></span><span class="text-white/80">→</span>
+          </a>
+        </div>
+        <!-- 地區長者中心查詢 -->
+        <div class="mt-8 p-4 rounded-xl bg-[rgba(100,130,176,0.06)]">
+          <label class="block mb-2 font-semibold label" data-lang-tc="選擇地區查詢長者中心" data-lang-sc="选择地区查询长者中心" data-lang-en="Select district for elderly centre"></label>
+          <div class="flex flex-col sm:flex-row gap-3 items-stretch">
+            <select id="districtSelect" class="w-full sm:w-72 px-4 py-3 rounded-xl border border-[rgba(100,130,176,0.30)] bg-white transition-base focus-ring text-[18px]">
+              <option value="shatin" data-lang-tc="沙田區" data-lang-sc="沙田区" data-lang-en="Sha Tin"></option>
+              <option value="kwuntong" data-lang-tc="觀塘區" data-lang-sc="观塘区" data-lang-en="Kwun Tong"></option>
+              <option value="yuenlong" data-lang-tc="元朗區" data-lang-sc="元朗区" data-lang-en="Yuen Long"></option>
+            </select>
+            <button id="refreshBtn" class="btn btn-lg accent transition-base focus-ring px-6 w-full sm:w-auto" data-lang-tc="查詢" data-lang-sc="查询" data-lang-en="Load"></button>
+          </div>
+          <div id="resourceList" class="mt-5 space-y-4"></div>
+          <div class="mt-6 text-slate-600 text-sm space-y-1">
+            <div data-lang-tc="數據來源：香港社會福利署公開資源 data.gov.hk" data-lang-sc="数据来源：香港社会福利署公开资源 data.gov.hk" data-lang-en="Data Source: Hong Kong SWD Open Resources data.gov.hk"></div>
+          </div>
+        </div>
+        <div class="mt-10">
+          <a href="#/" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回首頁" data-lang-sc="返回首页" data-lang-en="Back Home"></span></a>
+        </div>
+      </div>
+    </div>
+    <!-- 長者子頁：服務提醒設定 -->
+    <div id="page-reminder" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="服務提醒設定表單" data-lang-sc="服务提醒设定表单" data-lang-en="Service Reminder Setup Form"></h2>
+      <div class="card shadow-soft bg-white p-8 max-w-xl elder-friendly">
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="長者姓名" data-lang-sc="长者姓名" data-lang-en="Elder Full Name"></label>
+          <input type="text" class="text-[18px]" placeholder="填寫長者全名">
+        </div>
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="提醒類型" data-lang-sc="提醒类型" data-lang-en="Reminder Type"></label>
+          <select class="text-[18px]">
+            <option data-lang-tc="醫生覆診" data-lang-sc="医生复诊" data-lang-en="Clinic Follow-up"></option>
+            <option data-lang-tc="疫苗接種預約" data-lang-sc="疫苗接种预约" data-lang-en="Vaccination Appointment"></option>
+            <option data-lang-tc="福利申請截止日期" data-lang-sc="福利申请截止日期" data-lang-en="Benefit Application Deadline"></option>
+            <option data-lang-tc="長者卡續期" data-lang-sc="长者卡续期" data-lang-en="Elderly Card Renewal"></option>
+          </select>
+        </div>
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="事件日期" data-lang-sc="事件日期" data-lang-en="Event Date"></label>
+          <input type="date" class="text-[18px]">
+        </div>
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="提前幾天發送提醒" data-lang-sc="提前几天发送提醒" data-lang-en="Reminder Advance Days"></label>
+          <select class="text-[18px]">
+            <option data-lang-tc="當日" data-lang-sc="当日" data-lang-en="Same Day"></option>
+            <option data-lang-tc="提前1天" data-lang-sc="提前1天" data-lang-en="1 Day Before"></option>
+            <option data-lang-tc="提前3天" data-lang-sc="提前3天" data-lang-en="3 Days Before"></option>
+            <option data-lang-tc="提前7天" data-lang-sc="提前7天" data-lang-en="7 Days Before"></option>
+          </select>
+        </div>
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="接收提醒方式" data-lang-sc="接收提醒方式" data-lang-en="Reminder Channel"></label>
+          <div class="flex flex-wrap gap-3">
+            <label class="flex items-center gap-2 keypoint"><input type="checkbox" style="width:auto"><span data-lang-tc="手機短訊" data-lang-sc="手机短讯" data-lang-en="SMS"></span></label>
+            <label class="flex items-center gap-2 keypoint"><input type="checkbox" style="width:auto"><span data-lang-tc="電郵通知" data-lang-sc="电邮通知" data-lang-en="Email"></span></label>
+            <label class="flex items-center gap-2 keypoint"><input type="checkbox" style="width:auto"><span data-lang-tc="家屬同步通知" data-lang-sc="家属同步通知" data-lang-en="Notify Family"></span></label>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="備註補充" data-lang-sc="备注补充" data-lang-en="Extra Remark"></label>
+          <textarea class="text-[18px]" placeholder="例如：需要攜帶藥物、身份證"></textarea>
+        </div>
+        <button id="reminderSubmit" class="btn btn-lg primary w-full transition-base focus-ring" data-lang-tc="儲存提醒設定" data-lang-sc="储存提醒设定" data-lang-en="Save Reminder"></button>
+        <div class="mt-6">
+          <a href="#/elder" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回長者服務面板" data-lang-sc="返回长者服务面板" data-lang-en="Back to Elder Panel"></span></a>
+        </div>
+      </div>
+    </div>
+    <!-- 長者子頁：代辦登記申請 -->
+    <div id="page-proxy" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="代辦福利登記申請表單" data-lang-sc="代办福利登记申请表单" data-lang-en="Proxy Welfare Application Form"></h2>
+      <div class="card shadow-soft bg-white p-8 max-w-xl elder-friendly">
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="代辦人姓名（家屬/義工）" data-lang-sc="代办人姓名（家属/义工）" data-lang-en="Proxy Full Name"></label>
+          <input type="text" class="text-[18px]">
+        </div>
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="與長者關係" data-lang-sc="与长者关系" data-lang-en="Relationship with Elder"></label>
+          <select class="text-[18px]">
+            <option data-lang-tc="子女" data-lang-sc="子女" data-lang-en="Child"></option>
+            <option data-lang-tc="配偶" data-lang-sc="配偶" data-lang-en="Spouse"></option>
+            <option data-lang-tc="親戚" data-lang-sc="亲戚" data-lang-en="Relative"></option>
+            <option data-lang-tc="註冊銀伴義工" data-lang-sc="注册银伴义工" data-lang-en="Registered SilverNav Volunteer"></option>
+            <option data-lang-tc="院舍職員" data-lang-sc="院舍职员" data-lang-en="Care Home Staff"></option>
+          </select>
+        </div>
+        <div class="form-item grid grid-cols-2 gap-4">
+          <div>
+            <label class="form-label label" data-lang-tc="長者姓名" data-lang-sc="长者姓名" data-lang-en="Elder Name"></label>
+            <input type="text" class="text-[18px]">
+          </div>
+          <div>
+            <label class="form-label label" data-lang-tc="身份證首4位" data-lang-sc="身份证首4位" data-lang-en="HKID First 4 Digits"></label>
+            <input type="text" class="text-[18px]" maxlength="4">
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="申請福利類別" data-lang-sc="申请福利类别" data-lang-en="Welfare Type to Apply"></label>
+          <select class="text-[18px]">
+            <option data-lang-tc="長者生活津貼" data-lang-sc="长者生活津贴" data-lang-en="Old Age Living Allowance"></option>
+            <option data-lang-tc="綜合社會保障援助（長者）" data-lang-sc="综合社会保障援助（长者）" data-lang-en="CSSA for Elderly"></option>
+            <option data-lang-tc="長者社區照顧服務券" data-lang-sc="长者社区照顾服务券" data-lang-en="Elderly Community Care Voucher"></option>
+            <option data-lang-tc="公立醫療費用減免" data-lang-sc="公立医疗费用减免" data-lang-en="Public Hospital Fee Waiver"></option>
+          </select>
+        </div>
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="聯絡電話" data-lang-sc="联络电话" data-lang-en="Contact Phone"></label>
+          <input type="tel" class="text-[18px]" placeholder="香港手機號碼">
+        </div>
+        <div class="form-item flex items-start gap-2">
+          <input type="checkbox" style="width:auto; margin-top:6px;">
+          <span class="keypoint" data-lang-tc="本人確認獲長者授權代辦申請，資料真實有效" data-lang-sc="本人确认获长者授权代办申请，资料真实有效" data-lang-en="I confirm I am authorized by elder, all info is true"></span>
+        </div>
+        <button id="proxySubmit" class="btn btn-lg primary w-full transition-base focus-ring" data-lang-tc="提交代辦申請" data-lang-sc="提交代办申请" data-lang-en="Submit Proxy Application"></button>
+        <div class="mt-6">
+          <a href="#/elder" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回長者服務面板" data-lang-sc="返回长者服务面板" data-lang-en="Back to Elder Panel"></span></a>
+        </div>
+      </div>
+    </div>
+        <!-- 長者子頁：義工陪伴預約 -->
+    <div id="page-booking" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="義工陪伴服務預約表單" data-lang-sc="义工陪伴服务预约表单" data-lang-en="Volunteer Companion Booking Form"></h2>
+      <div class="card shadow-soft bg-white p-8 max-w-xl elder-friendly">
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="長者姓名" data-lang-sc="长者姓名" data-lang-en="Elder Full Name"></label>
+          <input type="text" class="text-[18px]" placeholder="填寫長者全名">
+        </div>
+
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="服務類型" data-lang-sc="服务类型" data-lang-en="Service Category"></label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex items-center justify-center border rounded-xl p-3 cursor-pointer transition-base hover:bg-slate-100">
+              <input type="radio" name="serviceType" class="mr-2" style="width:auto">
+              <span class="keypoint" data-lang-tc="覆診陪同" data-lang-sc="复诊陪同" data-lang-en="Clinic Escort"></span>
+            </label>
+            <label class="flex items-center justify-center border rounded-xl p-3 cursor-pointer transition-base hover:bg-slate-100">
+              <input type="radio" name="serviceType" class="mr-2" style="width:auto">
+              <span class="keypoint" data-lang-tc="數碼支援" data-lang-sc="数码支援" data-lang-en="Digital Help"></span>
+            </label>
+            <label class="flex items-center justify-center border rounded-xl p-3 cursor-pointer transition-base hover:bg-slate-100">
+              <input type="radio" name="serviceType" class="mr-2" style="width:auto">
+              <span class="keypoint" data-lang-tc="居家陪伴" data-lang-sc="居家陪伴" data-lang-en="Home Companion"></span>
+            </label>
+            <label class="flex items-center justify-center border rounded-xl p-3 cursor-pointer transition-base hover:bg-slate-100">
+              <input type="radio" name="serviceType" class="mr-2" style="width:auto">
+              <span class="keypoint" data-lang-tc="戶外散步" data-lang-sc="户外散步" data-lang-en="Outdoor Walk"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-item grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="form-label label" data-lang-tc="預約日期" data-lang-sc="预约日期" data-lang-en="Booking Date"></label>
+            <input type="date" class="text-[18px]">
+          </div>
+          <div>
+            <label class="form-label label" data-lang-tc="服務時段" data-lang-sc="服务时段" data-lang-en="Time Slot"></label>
+            <select class="text-[18px]">
+              <option data-lang-tc="上午 9:00-12:00" data-lang-sc="上午 9:00-12:00" data-lang-en="Morning 9:00-12:00"></option>
+              <option data-lang-tc="下午 14:00-17:00" data-lang-sc="下午 14:00-17:00" data-lang-en="Afternoon 14:00-17:00"></option>
+              <option data-lang-tc="傍晚 18:00-20:00" data-lang-sc="傍晚 18:00-20:00" data-lang-en="Evening 18:00-20:00"></option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="服務地區" data-lang-sc="服务地区" data-lang-en="Service District"></label>
+          <select class="text-[18px]">
+            <option value="shatin" data-lang-tc="沙田區" data-lang-sc="沙田区" data-lang-en="Sha Tin"></option>
+            <option value="kwuntong" data-lang-tc="觀塘區" data-lang-sc="观塘区" data-lang-en="Kwun Tong"></option>
+            <option value="yuenlong" data-lang-tc="元朗區" data-lang-sc="元朗区" data-lang-en="Yuen Long"></option>
+          </select>
+        </div>
+
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="上門詳細地址" data-lang-sc="上门详细地址" data-lang-en="Full Home Address"></label>
+          <input type="text" class="text-[18px]" placeholder="屋邨/大廈、座數、單位">
+        </div>
+
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="聯絡電話" data-lang-sc="联络电话" data-lang-en="Contact Phone"></label>
+          <input type="tel" class="text-[18px]" placeholder="香港手機號碼">
+        </div>
+
+        <div class="form-item">
+          <label class="form-label label" data-lang-tc="特別需求備註" data-lang-sc="特别需求备注" data-lang-en="Special Requirements"></label>
+          <textarea class="text-[18px]" placeholder="例如：需要輪椅協助、只懂廣東話、需攜帶助聽器"></textarea>
+        </div>
+
+        <button id="bookingSubmit" class="btn btn-lg primary w-full transition-base focus-ring" data-lang-tc="提交預約申請" data-lang-sc="提交预约申请" data-lang-en="Submit Booking"></button>
+
+        <div class="mt-6">
+          <a href="#/elder" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回長者服務面板" data-lang-sc="返回长者服务面板" data-lang-en="Back to Elder Panel"></span></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 地區福利資訊表格頁 #/welfare-table -->
+    <div id="page-welfare-table" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="地區安老福利資訊查詢" data-lang-sc="地区安老福利资讯查询" data-lang-en="District Elderly Welfare Query"></h2>
+      <p class="mb-4 text-slate-600" data-lang-tc="資料來源：香港社會福利署SWD；點擊項目跳轉至政府官方網站閱讀完整申請細節" data-lang-sc="资料来源：香港社会福利署SWD；点击项目跳转至政府官方网站阅读完整申请细节" data-lang-en="Source: HK SWD. Click item to open official government page for full details"></p>
+
+      <div class="card shadow-soft bg-white p-6 overflow-x-auto">
+        <table>
+          <thead>
+            <tr>
+              <th data-lang-tc="地區" data-lang-sc="地区" data-lang-en="District"></th>
+              <th data-lang-tc="福利項目" data-lang-sc="福利项目" data-lang-en="Welfare Item"></th>
+              <th data-lang-tc="簡介" data-lang-sc="简介" data-lang-en="Brief"></th>
+              <th data-lang-tc="官方連結" data-lang-sc="官方连结" data-lang-en="Official Link"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-lang-tc="沙田區" data-lang-sc="沙田区" data-lang-en="Sha Tin"></td>
+              <td data-lang-tc="長者生活津貼" data-lang-sc="长者生活津贴" data-lang-en="Old Age Living Allowance"></td>
+              <td data-lang-tc="合資格長者每月現金津貼" data-lang-sc="合资格长者每月现金津贴" data-lang-en="Monthly cash allowance for eligible elderly"></td>
+              <td><a class="gov-link" target="_blank" href="https://www.swd.gov.hk/tc/index/site_pubsvc/page_socsecu/page_ssbenefit/page_ola/">SWD 長者生活津貼</a></td>
+            </tr>
+            <tr>
+              <td data-lang-tc="觀塘區" data-lang-sc="观塘区" data-lang-en="Kwun Tong"></td>
+              <td data-lang-tc="綜合社會保障援助（長者）" data-lang-sc="综合社会保障援助（长者）" data-lang-en="CSSA (Elderly)"></td>
+              <td data-lang-tc="經濟有困難長者綜援援助" data-lang-sc="经济有困难长者综援援助" data-lang-en="CSSA for financially needy elderly"></td>
+              <td><a class="gov-link" target="_blank" href="https://www.swd.gov.hk/tc/index/site_pubsvc/page_socsecu/page_cssa/">SWD 綜援計劃</a></td>
+            </tr>
+            <tr>
+              <td data-lang-tc="元朗區" data-lang-sc="元朗区" data-lang-en="Yuen Long"></td>
+              <td data-lang-tc="長者社區照顧服務券" data-lang-sc="长者社区照顾服务券" data-lang-en="Elderly Community Care Voucher"></td>
+              <td data-lang-tc="補助居家長者購買照顧服務" data-lang-sc="补助居家长者购买照顾服务" data-lang-en="Subsidy for home-based care purchase"></td>
+              <td><a class="gov-link" target="_blank" href="https://www.swd.gov.hk/tc/index/site_eld/page_communitycare/">SWD 社區照顧券</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#/elder" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回長者及家屬專區" data-lang-sc="返回长者及家属专区" data-lang-en="Back to Elder Zone"></span></a>
+          <a href="#/" class="ghost px-6 py-3 rounded-xl"><span data-lang-tc="返回首頁" data-lang-sc="返回首页" data-lang-en="Back Home"></span></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. 完整社福機構列表 #/agency-list -->
+    <div id="page-agency-list" class="page-view">
+      <h2 class="text-3xl font-bold text-[color:var(--primary)] mb-6" data-lang-tc="社福機構完整列表" data-lang-sc="社福机构完整列表" data-lang-en="Full Agency List"></h2>
+      <p class="mb-4 text-slate-600" data-lang-tc="數據來源：社署SWD / data.gov.hk公開數據；可按地區篩選" data-lang-sc="数据来源：社署SWD / data.gov.hk公开数据；可按地区筛选" data-lang-en="Source: SWD / data.gov.hk open data. Filter by district"></p>
+
+      <div class="card shadow-soft bg-white p-6 overflow-x-auto">
+        <div class="mb-4">
+          <label class="mr-2" data-lang-tc="篩選地區：" data-lang-sc="筛选地区：" data-lang-en="Filter district:"></label>
+          <select id="agencyFilter">
+            <option value="all" data-lang-tc="全部地區" data-lang-sc="全部地区" data-lang-en="All Districts"></option>
+            <option value="shatin" data-lang-tc="沙田區" data-lang-sc="沙田区" data-lang-en="Sha Tin"></option>
+            <option value="kwuntong" data-lang-tc="觀塘區" data-lang-sc="观塘区" data-lang-en="Kwun Tong"></option>
+            <option value="yuenlong" data-lang-tc="元朗區" data-lang-sc="元朗区" data-lang-en="Yuen Long"></option>
+          </select>
+        </div>
+
+        <table id="agencyTable">
+          <thead>
+            <tr>
+              <th data-lang-tc="地區" data-lang-sc="地区" data-lang-en="District"></th>
+              <th data-lang-tc="機構名稱" data-lang-sc="机构名称" data-lang-en="Agency Name"></th>
+              <th data-lang-tc="服務類別" data-lang-sc="服务类别" data-lang-en="Service Type"></th>
+              <th data-lang-tc="地址" data-lang-sc="地址" data-lang-en="Address"></th>
+              <th data-lang-tc="聯絡電話" data-lang-sc="联络电话" data-lang-en="Phone"></th>
+            </tr>
+          </thead>
+          <tbody id="agencyTableBody"></tbody>
+        </table>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#/ngo" class="ghost px-6 py-3 rounded-xl">← <span data-lang-tc="返回社福機構專區" data-lang-sc="返回社福机构专区" data-lang-en="Back to NGO Zone"></span></a>
+          <a href="#/" class="ghost px-6 py-3 rounded-xl"><span data-lang-tc="返回首頁" data-lang-sc="返回首页" data-lang-en="Back Home"></span></a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 全局彈窗提示 -->
+  <div id="toast" class="toast success"></div>
+
+  <footer class="border-t border-[rgba(100,130,176,0.18)] mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-slate-600">
+      <div data-lang-tc="銀伴導航 SilverNav 示範原型｜本原型使用香港社署data.gov.hk公開數據及公開資源｜僅供HKSEC比賽演示用途。"
+           data-lang-sc="银伴导航 SilverNav 示范原型｜本原型使用香港社署data.gov.hk公开数据及公开资源｜仅供HKSEC比赛演示用途。"
+           data-lang-en="SilverNav Prototype | Uses HK SWD data.gov.hk open data and resources | For HKSEC competition demo only."></div>
+    </div>
+  </footer>
+
+  <script>
+    // 機構原始數據
+    const resources = {
+      shatin: [
+        {
+          district: "shatin",
+          name_tc: "東華三院王澤森長者地區中心",
+          type_tc: "長者地區中心",
+          addr_tc: "新界沙田沙角邨綠鷺樓地下1-8號",
+          tel: "2647 2711",
+          desc_tc: "提供長者綜合諮詢、社區飯堂堂食及外賣、長者活動、轉介服務",
+          name_sc: "东华三院王泽森长者地区中心",
+          type_sc: "长者地区中心",
+          addr_sc: "新界沙田沙角邨绿鹭楼地下1-8号",
+          desc_sc: "提供长者综合咨询、社区饭堂堂食及外卖、长者活动、转介服务",
+          name_en: "TWGHs Wong Chak Sum District Elderly Community Centre",
+          type_en: "District Elderly Community Centre",
+          addr_en: "G/F 1-8, Luk Lo House, Sha Kok Estate, Sha Tin, N.T.",
+          desc_en: "Elderly enquiry, community canteen dine-in/takeaway, activities, referral"
+        },
+        {
+          district: "shatin",
+          name_tc: "基督教香港信義會沙田多元化金齡服務中心",
+          type_tc: "長者綜合服務中心",
+          addr_tc: "新界沙田瀝源邨貴和樓地下",
+          tel: "2691 7163",
+          desc_tc: "長者日間活動、社區飯堂、數碼支援、輔導服務",
+          name_sc: "基督教香港信义会沙田多元化金龄服务中心",
+          type_sc: "长者综合服务中心",
+          addr_sc: "新界沙田沥源邨贵和楼地下",
+          desc_sc: "长者日间活动、社区饭堂、数码支援、辅导服务",
+          name_en: "ELCHK Sha Tin Multi-service Centre for Senior Citizens",
+          type_en: "Integrated Elderly Service Centre",
+          addr_en: "G/F, Kwai Wo House, Lek Yuen Estate, Sha Tin, N.T.",
+          desc_en: "Day activities, canteen, digital support, counselling"
+        }
+      ],
+      kwuntong: [
+        {
+          district: "kwuntong",
+          name_tc: "保良局劉陳小寶長者地區中心",
+          type_tc: "長者地區中心",
+          addr_tc: "九龍觀塘成業街2號成業工業大廈地下",
+          tel: "2177 6300",
+          desc_tc: "長者福利諮詢、社區飯堂三餐服務、長者活動、個案轉介",
+          name_sc: "保良局刘陈小宝长者地区中心",
+          type_sc: "长者地区中心",
+          addr_sc: "九龙观塘成业街2号成业工业大厦地下",
+          desc_sc: "长者福利咨询、社区饭堂三餐服务、长者活动、个案转介",
+          name_en: "Po Leung Kuk Lau Chan Siu Po District Elderly Community Centre",
+          type_en: "District Elderly Community Centre",
+          addr_en: "G/F, Shing Yip Industrial Building, 2 Shing Yip St, Kwun Tong, KLN",
+          desc_en: "Elderly consultation, 3-meal canteen, activities, case referral"
+        },
+        {
+          district: "kwuntong",
+          name_tc: "明愛牛頭角長者中心",
+          type_tc: "長者鄰舍中心",
+          addr_tc: "九龍牛頭角樂華南邨奮華樓地下",
+          tel: "2117 0707",
+          desc_tc: "惜食堂熱飯派發、長者社交活動、緊急支援轉介",
+          name_sc: "明爱牛头角长者中心",
+          type_sc: "长者邻舍中心",
+          addr_sc: "九龙牛头角乐华南邨奋华楼地下",
+          desc_sc: "惜食堂热饭派发、长者社交活动、紧急支援转介",
+          name_en: "Caritas Ngau Tau Kok Elderly Centre",
+          type_en: "Neighbourhood Elderly Centre",
+          addr_en: "G/F, Fan Wah House, Lok Wah South Estate, Ngau Tau Kok, KLN",
+          desc_en: "Hot meal distribution, social activities, emergency support referral"
+        }
+      ],
+      yuenlong: [
+        {
+          district: "yuenlong",
+          name_tc: "香港明愛元朗長者地區中心",
+          type_tc: "長者地區中心",
+          addr_tc: "新界元朗水邊圍邨盈水樓11-20A地下",
+          tel: "2479 7383",
+          desc_tc: "安老福利查詢、長者活動、飯堂資訊、個案輔導及轉介",
+          name_sc: "香港明爱元朗长者地区中心",
+          type_sc: "长者地区中心",
+          addr_sc: "新界元朗水边围邨盈水楼11-20A地下",
+          desc_sc: "安老福利查询、长者活动、饭堂资讯、个案辅导及转介",
+          name_en: "Caritas Yuen Long District Elderly Community Centre",
+          type_en: "District Elderly Community Centre",
+          addr_en: "G/F 11-20A, Ying Shui House, Shui Pin Wai Estate, Yuen Long, N.T.",
+          desc_en: "Elderly welfare enquiry, activities, canteen info, counselling & referral"
+        },
+        {
+          district: "yuenlong",
+          name_tc: "保良局天恩長者宿舍暨綠愉日間護理中心",
+          type_tc: "長者日間護理單位",
+          addr_tc: "新界元朗天水圍天恩邨服務設施大樓3-4樓",
+          tel: "3741 0850",
+          desc_tc: "日間護理、復康活動、膳食服務",
+          name_sc: "保良局天恩长者宿舍暨绿愉日间护理中心",
+          type_sc: "长者日间护理单位",
+          addr_sc: "新界元朗天水围天恩邨服务设施大楼3-4楼",
+          desc_sc: "日间护理、复康活动、膳食服务",
+          name_en: "Po Leung Kuk Tin Yan Hostel & Green Joy Day Care Centre",
+          type_en: "Elderly Day Care Unit",
+          addr_en: "3/F-4/F, Service Block, Tin Yan Estate, Tin Shui Wai, Yuen Long, N.T.",
+          desc_en: "Day care, rehab activities, meal service"
+        }
+      ]
+    };
+
+    // 把全部機構攤平
+    let allAgencyList = [];
+    Object.values(resources).forEach(arr => allAgencyList = allAgencyList.concat(arr));
+
+    let currentLang = 'tc';
+    let elderLarge = false;
+    const toastEl = document.getElementById('toast');
+
+    // 彈窗提示
+    function showToast(msgTc, msgSc, msgEn) {
+      let text = currentLang === 'tc' ? msgTc : currentLang === 'sc' ? msgSc : msgEn;
+      toastEl.textContent = text;
+      toastEl.style.opacity = "1";
+      setTimeout(() => toastEl.style.opacity = "0", 2500);
+    }
+
+    // Hash路由
+    function renderRouter() {
+      const hash = window.location.hash.replace('#', '') || '/';
+      document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+
+      const routeMap = {
+        "/": "page-home",
+        "/ngo": "page-ngo",
+        "/ngo-login": "page-ngo-login",
+        "/ngo-match": "page-ngo-match",
+        "/ngo-report": "page-ngo-report",
+        "/student": "page-student",
+        "/stu-register": "page-stu-register",
+        "/stu-cert": "page-stu-cert",
+        "/elder": "page-elder",
+        "/reminder": "page-reminder",
+        "/proxy": "page-proxy",
+        "/booking": "page-booking",
+        "/welfare-table": "page-welfare-table",
+        "/agency-list": "page-agency-list"
+      };
+
+      const targetId = routeMap[hash] || "page-home";
+      document.getElementById(targetId).classList.add('active');
+      renderAgencyTable();
+    }
+
+    // 語言替換
+    function applyLangToElement(el) {
+      const tc = el.dataset.langTc;
+      const sc = el.dataset.langSc;
+      const en = el.dataset.langEn;
+      let text = currentLang === 'tc' ? tc : currentLang === 'sc' ? sc : en;
+      if (text !== undefined) el.textContent = text;
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = currentLang === 'tc' ? 'zh-Hant' : currentLang === 'sc' ? 'zh-Hans' : 'en';
+      document.querySelectorAll('[data-lang-tc]').forEach(applyLangToElement);
+      document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('lang-active', btn.dataset.setLang === currentLang));
+      renderResources();
+      renderAgencyTable();
+    }
+
+    function label(tc, sc, en) {
+      return currentLang === 'en' ? en : currentLang === 'sc' ? sc : tc;
+    }
+
+    function escapeHTML(str) {
+      return String(str ?? "").replace(/[&<>"']/g, s => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[s]));
+    }
+
+    // 長者地區中心渲染
+    function renderResources() {
+      const sel = document.getElementById('districtSelect');
+      const listEl = document.getElementById('resourceList');
+      if (!sel || !listEl) return;
+
+      const district = sel.value || 'shatin';
+      const data = resources[district] ?? [];
+      listEl.innerHTML = '';
+
+      if (!data.length) {
+        listEl.innerHTML = `<div class="text-slate-500 py-4">${label("暫無資料", "暂无资料", "No data available")}</div>`;
+        return;
+      }
+
+      data.forEach(item => {
+        const name = item[`name_${currentLang}`] || item.name_tc;
+        const type = item[`type_${currentLang}`] || item.type_tc;
+        const addr = item[`addr_${currentLang}`] || item.addr_tc;
+        const desc = item[`desc_${currentLang}`] || item.desc_tc;
+
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-xl bg-white shadow-soft border border-[rgba(100,130,176,0.12)]';
+        card.innerHTML = `
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <div>
+              <div class="text-xl font-semibold text-[color:var(--primary)]">${escapeHTML(name)}</div>
+              <div class="text-slate-600 mt-1">${escapeHTML(type)}</div>
+            </div>
+            <a href="tel:${item.tel}" class="px-4 py-2 rounded-lg ghost focus-ring transition-base flex items-center gap-2">
+              <span>${label('致電', '致电', 'Call')}</span>
+            </a>
+          </div>
+          <div class="mt-3 text-slate-700 space-y-1">
+            <div><span class="font-medium">${label('地址', '地址', 'Address')}：</span>${escapeHTML(addr)}</div>
+            <div><span class="font-medium">${label('聯絡電話', '联络电话', 'Phone')}：</span><a href="tel:${item.tel}" class="text-[color:var(--primary)] underline">${item.tel}</a></div>
+            <div><span class="font-medium">${label('服務簡介', '服务简介', 'Summary')}：</span>${escapeHTML(desc)}</div>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    // 機構表格渲染
+    function renderAgencyTable() {
+      const filterVal = document.getElementById('agencyFilter')?.value || 'all';
+      const tbody = document.getElementById('agencyTableBody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      const showList = filterVal === 'all' ? allAgencyList : allAgencyList.filter(d => d.district === filterVal);
+
+      showList.forEach(item => {
+        const name = item[`name_${currentLang}`] || item.name_tc;
+        const type = item[`type_${currentLang}`] || item.type_tc;
+        const addr = item[`addr_${currentLang}`] || item.addr_tc;
+
+        const districtName = label(
+          item.district === 'shatin' ? "沙田區" : item.district === 'kwuntong' ? "觀塘區" : "元朗區",
+          item.district === 'shatin' ? "沙田区" : item.district === 'kwuntong' ? "观塘区" : "元朗区",
+          item.district === 'shatin' ? "Sha Tin" : item.district === 'kwuntong' ? "Kwun Tong" : "Yuen Long"
+        );
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHTML(districtName)}</td>
+          <td>${escapeHTML(name)}</td>
+          <td>${escapeHTML(type)}</td>
+          <td>${escapeHTML(addr)}</td>
+          <td><a href="tel:${item.tel}" class="text-[color:var(--primary)] underline">${item.tel}</a></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 頁面載入後綁定事件
+    document.addEventListener('DOMContentLoaded', () => {
+      window.addEventListener('hashchange', renderRouter);
+      renderRouter();
+
+      // 手機選單
+      const menuToggle = document.getElementById('menuToggle');
+      const mobileMenu = document.getElementById('mobileMenu');
+      menuToggle.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+
+      // 語言切換
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentLang = btn.dataset.setLang;
+          applyLanguage();
+        });
+      });
+
+      // 長者大字模式
+      const toggleLargeBtn = document.getElementById('toggleLarge');
+      const elderCard = document.getElementById('elder');
+      toggleLargeBtn.addEventListener('click', () => {
+        elderLarge = !elderLarge;
+        elderCard.classList.toggle('elder-enlarge', elderLarge);
+      });
+
+      // 長者地區查詢
+      document.getElementById('districtSelect').addEventListener('change', renderResources);
+      document.getElementById('refreshBtn').addEventListener('click', renderResources);
+
+      // 機構表格篩選
+      document.getElementById('agencyFilter').addEventListener('change', renderAgencyTable);
+
+      // 表單提交彈窗
+      document.getElementById('ngoLoginBtn').addEventListener('click', () => {
+        showToast("模擬登入成功，跳轉管理首頁", "模拟登录成功，跳转管理首页", "Login simulated, redirecting to dashboard");
+      });
+
+      document.getElementById('matchVolBtn').addEventListener('click', () => {
+        showToast("已自動匹配3位合適義工，可查看清單", "已自动匹配3位合适义工，可查看清单", "3 suitable volunteers matched, view list");
+      });
+
+      document.getElementById('exportReportBtn').addEventListener('click', () => {
+        showToast("社署標準Excel報表已生成，自動下載", "社署标准Excel报表已生成，自动下载", "SWD Excel report generated, downloading");
+      });
+
+      document.getElementById('stuRegBtn').addEventListener('click', () => {
+        showToast("註冊申請提交成功，1個工作日審核", "注册申请提交成功，1个工作日审核", "Registration submitted, review in 1 working day");
+      });
+
+      document.getElementById('stuCertBtn').addEventListener('click', () => {
+        showToast("服務證明申請完成，電郵將於24小時發送", "服务证明申请完成，电邮将于24小时发送", "Certificate request done, email within 24 hours");
+      });
+
+      document.getElementById('reminderSubmit').addEventListener('click', () => {
+        showToast("提醒已儲存，將按設定自動發送通知", "提醒已储存，将按设定自动发送通知", "Reminder saved, auto-notification scheduled");
+      });
+
+      document.getElementById('proxySubmit').addEventListener('click', () => {
+        showToast("代辦福利申請已登記，3個工作日內聯絡", "代办福利申请已登记，3个工作日内联络", "Proxy application logged, contact within 3 working days");
+      });
+
+      document.getElementById('bookingSubmit').addEventListener('click', () => {
+        showToast("陪伴預約提交成功，1日內完成義工配對", "陪伴预约提交成功，1日内完成义工配对", "Companion booking submitted, volunteer match within 1 day");
+      });
+
+      applyLanguage();
+      renderResources();
+    });
+  </script>
+</body>
+</html>
+
